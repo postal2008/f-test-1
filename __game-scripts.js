@@ -24,8 +24,8 @@ Zoom.prototype.initialize = function () {
     }
 
     // Начальные значения
-    this.currentTime = 0;
-    this.targetTime = 0;
+    this.currentTime = duration;
+    this.targetTime = duration;
 
     this.entity.anim.speed = 0;
 
