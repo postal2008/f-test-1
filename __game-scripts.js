@@ -1002,16 +1002,14 @@ Zoom.prototype.initialize = function () {
     
     this.entity.anim.speed = 0;
 
-    // Слушаем сообщения от Webflow
-    window.addEventListener('message', this.onMessage.bind(this), false);
+    window.addEventListener('message', this.onMessage.bind(this));
 };
 
 Zoom.prototype.onMessage = function (event) {
     if (event.data.type !== 'scrollProgress') return;
-
+    
     const progress = event.data.progress || 0;
     const duration = this.animLayer ? this.animLayer.activeStateDuration || 1 : 1;
-    
     this.targetTime = duration * progress;
 };
 
