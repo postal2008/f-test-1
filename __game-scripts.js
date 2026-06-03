@@ -1,3 +1,13 @@
+Zoom.prototype.initialize = function () {
+    console.log('🚀 Zoom script initialized on:', this.entity.name);
+    
+    window.addEventListener('message', this.onMessage.bind(this));
+    
+    // Тестовый лог
+    window.addEventListener('message', (e) => {
+        console.log('📨 Получено сообщение:', e.data);
+    });
+
 var Zoom = pc.createScript('zoom');
 
 Zoom.attributes.add('smoothness', { 
