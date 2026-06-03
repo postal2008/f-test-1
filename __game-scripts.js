@@ -47,3 +47,4 @@ Zoom.prototype.update = function (dt) {
 
     this.animLayer.activeStateCurrentTime = this.currentTime;
 };
+});
