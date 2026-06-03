@@ -325,8 +325,8 @@ Zoom.prototype.initialize = function () {
     
     const duration = this.animLayer ? this.animLayer.activeStateDuration || 1 : 1;
     
-    this.currentTime = duration;
-    this.targetTime = duration;
+    this.currentTime = 0;
+    this.targetTime = 0;
     
     this.entity.anim.speed = 0;
 
