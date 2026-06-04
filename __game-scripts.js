@@ -1186,35 +1186,21 @@ TriplanarMaterial.prototype.updateMaterial = function() {
 // RainVelocityController.js
 var RainVelocityController = pc.createScript('rainVelocityController');
 
-RainVelocityController.attributes.add('smoothness', {
-    type: 'number',
-    default: 0.2,
-    title: 'Плавность'
-});
-
-RainVelocityController.attributes.add('normalVelocityY', {
-    type: 'number',
-    default: -8
-});
-
-RainVelocityController.attributes.add('slowVelocityY', {
-    type: 'number',
-    default: -1
-});
+RainVelocityController.attributes.add('smoothness', { type: 'number', default: 0.2 });
+RainVelocityController.attributes.add('normalVelocityY', { type: 'number', default: -8 });
+RainVelocityController.attributes.add('slowVelocityY', { type: 'number', default: -1 });
 
 RainVelocityController.prototype.initialize = function () {
     this.currentVelocityY = this.normalVelocityY;
     this.targetVelocityY = this.normalVelocityY;
     this.lastAppliedVelocity = this.normalVelocityY;
 
-    console.log("✅ RainVelocityController: Скрипт инициализирован");
-
+    console.log("✅ RainVelocityController: Запущен");
     window.addEventListener('message', this.onMessage.bind(this));
 };
 
 RainVelocityController.prototype.onMessage = function (event) {
     if (event.data.type !== 'scrollProgress') return;
-
     const progress = event.data.progress || 0;
 
     if (progress <= 0.08 || progress >= 0.92) {
@@ -1243,12 +1229,9 @@ RainVelocityController.prototype.applyVelocity = function (velocityY) {
         [0, 0]
     ]);
 
+    // ←←← Самое важное изменение
     ps.localVelocityGraph = newGraph;
+    ps.localVelocityGraph2 = newGraph;   // Добавляем это!
 
-    // === ЖЁСТКИЙ ТЕСТ ===
-    console.log(`🔄 Velocity применена → Y = ${velocityY.toFixed(2)}`);
-
-    // Принудительно перезапускаем систему
-    ps.reset();
-    ps.play();
+    console.log(`🔄 Velocity Y применена = ${velocityY.toFixed(2)} | Зона: ${velocityY < -4 ? 'Нормальная' : 'Замедленная'}`);
 };
