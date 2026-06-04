@@ -1187,17 +1187,23 @@ TriplanarMaterial.prototype.updateMaterial = function() {
 var RainVelocityController = pc.createScript('rainVelocityController');
 
 RainVelocityController.prototype.initialize = function () {
-    console.log("✅ RainVelocityController: Тест velocityGraph");
+    console.log("✅ RainVelocityController: Тест velocityGraph v2");
 
     const ps = this.entity.particlesystem;
-    if (!ps) return;
+    if (!ps) {
+        console.warn("ParticleSystem не найден");
+        return;
+    }
 
-    // Пробуем оба варианта
-    const newGraph = new pc.CurveSet([[0, -1]]);   // очень медленно
+    // Правильный формат: 3 кривые (X, Y, Z)
+    const newGraph = new pc.CurveSet([
+        [0, 0],     // X velocity
+        [0, -1.5],  // Y velocity ← вот что мы меняем
+        [0, 0]      // Z velocity
+    ]);
 
-    ps.velocityGraph = newGraph;           // Вариант 1
-    ps.localVelocityGraph = newGraph;      // Вариант 2
-    ps.localVelocityGraph2 = newGraph;     // Вариант 3
+    ps.localVelocityGraph = newGraph;
+    ps.localVelocityGraph2 = newGraph;
 
-    console.log("🔧 Применены velocityGraph + localVelocityGraph");
+    console.log("🔧 localVelocityGraph установлен на Y = -1.5");
 };
