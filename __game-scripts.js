@@ -1186,20 +1186,64 @@ TriplanarMaterial.prototype.updateMaterial = function() {
 // RainVelocityController.js
 var RainVelocityController = pc.createScript('rainVelocityController');
 
-RainVelocityController.prototype.initialize = function () {
-    console.log("✅ Тест World Velocity");
+RainVelocityController.attributes.add('smoothness', {
+    type: 'number',
+    default: 0.15,
+    title: 'Плавность изменения скорости'
+});
 
+RainVelocityController.attributes.add('normalVelocityY', {
+    type: 'number',
+    default: -8,
+    title: 'Скорость Y при progress = 0 и 1'
+});
+
+RainVelocityController.attributes.add('slowVelocityY', {
+    type: 'number',
+    default: -1,
+    title: 'Скорость Y при скролле (0.1 - 0.9)'
+});
+
+RainVelocityController.prototype.initialize = function () {
+    this.currentVelocityY = this.normalVelocityY;
+    this.targetVelocityY = this.normalVelocityY;
+
+    window.addEventListener('message', this.onMessage.bind(this));
+};
+
+RainVelocityController.prototype.onMessage = function (event) {
+    if (event.data.type !== 'scrollProgress') return;
+
+    const progress = event.data.progress || 0;
+
+    if (progress <= 0.05 || progress >= 0.95) {
+        this.targetVelocityY = this.normalVelocityY;   // -8
+    } else {
+        this.targetVelocityY = this.slowVelocityY;     // -1
+    }
+};
+
+RainVelocityController.prototype.update = function (dt) {
+    this.currentVelocityY = pc.math.lerp(
+        this.currentVelocityY, 
+        this.targetVelocityY, 
+        this.smoothness
+    );
+
+    this.updateParticleVelocity(this.currentVelocityY);
+};
+
+RainVelocityController.prototype.updateParticleVelocity = function (velocityY) {
     const ps = this.entity.particlesystem;
     if (!ps) return;
 
+    // Правильный способ для World Velocity
     const newGraph = new pc.CurveSet([
-        [0, 0],     // X
-        [0, -1.5],  // Y  ← меняем здесь
-        [0, 0]      // Z
+        [0, 0],          // X
+        [0, velocityY],  // Y
+        [0, 0]           // Z
     ]);
 
-    ps.velocityGraph = newGraph;          // ← Вот это главное
-    ps.velocityGraph2 = newGraph;
-
-    console.log("🔧 velocityGraph установлен на Y = -1.5");
+    ps.velocityGraph = newGraph;
+    ps.velocityGraph2 = newGraph;   // важно для стабильности
 };
