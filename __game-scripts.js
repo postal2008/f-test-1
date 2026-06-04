@@ -1188,25 +1188,24 @@ var RainVelocityController = pc.createScript('rainVelocityController');
 
 RainVelocityController.attributes.add('smoothness', {
     type: 'number',
-    default: 0.15,
-    title: 'Плавность изменения скорости'
+    default: 0.2,
+    title: 'Плавность'
 });
 
 RainVelocityController.attributes.add('normalVelocityY', {
     type: 'number',
-    default: -8,
-    title: 'Скорость Y при progress = 0 и 1'
+    default: -8
 });
 
 RainVelocityController.attributes.add('slowVelocityY', {
     type: 'number',
-    default: -1,
-    title: 'Скорость Y при скролле (0.1 - 0.9)'
+    default: -1
 });
 
 RainVelocityController.prototype.initialize = function () {
     this.currentVelocityY = this.normalVelocityY;
     this.targetVelocityY = this.normalVelocityY;
+    this.lastAppliedVelocity = this.normalVelocityY;
 
     window.addEventListener('message', this.onMessage.bind(this));
 };
@@ -1216,8 +1215,7 @@ RainVelocityController.prototype.onMessage = function (event) {
 
     const progress = event.data.progress || 0;
 
-    // Логика по твоим зонам
-    if (progress <= 0.05 || progress >= 0.95) {
+    if (progress <= 0.08 || progress >= 0.92) {
         this.targetVelocityY = this.normalVelocityY;   // -8
     } else {
         this.targetVelocityY = this.slowVelocityY;     // -1
@@ -1225,27 +1223,27 @@ RainVelocityController.prototype.onMessage = function (event) {
 };
 
 RainVelocityController.prototype.update = function (dt) {
-    // Плавно меняем скорость
-    this.currentVelocityY = pc.math.lerp(
-        this.currentVelocityY, 
-        this.targetVelocityY, 
-        this.smoothness
-    );
+    // Плавно меняем целевую скорость
+    this.currentVelocityY = pc.math.lerp(this.currentVelocityY, this.targetVelocityY, this.smoothness);
 
-    // Обновляем Y velocity частиц
-    this.updateParticleVelocity(this.currentVelocityY);
+    // Применяем только если значение заметно изменилось
+    if (Math.abs(this.currentVelocityY - this.lastAppliedVelocity) > 0.3) {
+        this.applyVelocity(this.currentVelocityY);
+        this.lastAppliedVelocity = this.currentVelocityY;
+    }
 };
 
-RainVelocityController.prototype.updateParticleVelocity = function (velocityY) {
+RainVelocityController.prototype.applyVelocity = function (velocityY) {
     const ps = this.entity.particlesystem;
     if (!ps) return;
 
-    const graph = ps.localVelocityGraph;
+    // Полностью пересоздаём график — самый надёжный способ
+    const newGraph = new pc.CurveSet([
+        [0, 0],           // X
+        [0, velocityY],   // Y
+        [0, 0]            // Z
+    ]);
 
-    // curves[1] = Y канал
-    if (graph && graph.curves[1] && graph.curves[1].keys.length > 0) {
-        graph.curves[1].keys[0].value = velocityY;
-        ps.localVelocityGraph = graph; // применяем изменения
-    }
+    ps.localVelocityGraph = newGraph;
 };
 
