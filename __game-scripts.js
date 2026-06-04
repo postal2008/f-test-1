@@ -1207,6 +1207,8 @@ RainVelocityController.prototype.initialize = function () {
     this.targetVelocityY = this.normalVelocityY;
     this.lastAppliedVelocity = this.normalVelocityY;
 
+    console.log("✅ RainVelocityController: Скрипт инициализирован");
+
     window.addEventListener('message', this.onMessage.bind(this));
 };
 
@@ -1216,17 +1218,15 @@ RainVelocityController.prototype.onMessage = function (event) {
     const progress = event.data.progress || 0;
 
     if (progress <= 0.08 || progress >= 0.92) {
-        this.targetVelocityY = this.normalVelocityY;   // -8
+        this.targetVelocityY = this.normalVelocityY;
     } else {
-        this.targetVelocityY = this.slowVelocityY;     // -1
+        this.targetVelocityY = this.slowVelocityY;
     }
 };
 
 RainVelocityController.prototype.update = function (dt) {
-    // Плавно меняем целевую скорость
     this.currentVelocityY = pc.math.lerp(this.currentVelocityY, this.targetVelocityY, this.smoothness);
 
-    // Применяем только если значение заметно изменилось
     if (Math.abs(this.currentVelocityY - this.lastAppliedVelocity) > 0.3) {
         this.applyVelocity(this.currentVelocityY);
         this.lastAppliedVelocity = this.currentVelocityY;
@@ -1235,15 +1235,19 @@ RainVelocityController.prototype.update = function (dt) {
 
 RainVelocityController.prototype.applyVelocity = function (velocityY) {
     const ps = this.entity.particlesystem;
-    if (!ps) return;
+    if (!ps) {
+        console.warn("⚠️ RainVelocityController: ParticleSystem не найден");
+        return;
+    }
 
-    // Полностью пересоздаём график — самый надёжный способ
     const newGraph = new pc.CurveSet([
-        [0, 0],           // X
-        [0, velocityY],   // Y
-        [0, 0]            // Z
+        [0, 0],
+        [0, velocityY],
+        [0, 0]
     ]);
 
     ps.localVelocityGraph = newGraph;
-};
 
+    // Отладка
+    console.log(`🔄 Velocity обновлена → Y = ${velocityY.toFixed(2)} | Progress зона: ${this.targetVelocityY === this.normalVelocityY ? 'Нормальная' : 'Замедленная'}`);
+};
