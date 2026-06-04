@@ -1186,34 +1186,18 @@ TriplanarMaterial.prototype.updateMaterial = function() {
 // RainVelocityController.js
 var RainVelocityController = pc.createScript('rainVelocityController');
 
-RainVelocityController.attributes.add('testVelocityY', {
-    type: 'number',
-    default: -2,
-    title: 'Тестовая скорость Y'
-});
-
 RainVelocityController.prototype.initialize = function () {
-    console.log("✅ RainVelocityController: Простой тест запущен");
+    console.log("✅ RainVelocityController: Тест velocityGraph");
 
-    // Ждём один кадр и сразу применяем скорость
-    this.app.on('update', this.applyTestVelocity, this, { once: true });
-};
-
-RainVelocityController.prototype.applyTestVelocity = function () {
     const ps = this.entity.particlesystem;
-    if (!ps) {
-        console.warn("ParticleSystem не найден");
-        return;
-    }
+    if (!ps) return;
 
-    const newGraph = new pc.CurveSet([
-        [0, 0],
-        [0, this.testVelocityY],   // Меняем Y скорость
-        [0, 0]
-    ]);
+    // Пробуем оба варианта
+    const newGraph = new pc.CurveSet([[0, -1]]);   // очень медленно
 
-    ps.localVelocityGraph = newGraph;
-    ps.localVelocityGraph2 = newGraph;   // важно
+    ps.velocityGraph = newGraph;           // Вариант 1
+    ps.localVelocityGraph = newGraph;      // Вариант 2
+    ps.localVelocityGraph2 = newGraph;     // Вариант 3
 
-    console.log(`🚀 Тест: Velocity Y сразу установлена на ${this.testVelocityY}`);
+    console.log("🔧 Применены velocityGraph + localVelocityGraph");
 };
