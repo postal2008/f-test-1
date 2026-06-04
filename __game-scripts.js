@@ -1186,52 +1186,34 @@ TriplanarMaterial.prototype.updateMaterial = function() {
 // RainVelocityController.js
 var RainVelocityController = pc.createScript('rainVelocityController');
 
-RainVelocityController.attributes.add('smoothness', { type: 'number', default: 0.2 });
-RainVelocityController.attributes.add('normalVelocityY', { type: 'number', default: -8 });
-RainVelocityController.attributes.add('slowVelocityY', { type: 'number', default: -1 });
+RainVelocityController.attributes.add('testVelocityY', {
+    type: 'number',
+    default: -2,
+    title: 'Тестовая скорость Y'
+});
 
 RainVelocityController.prototype.initialize = function () {
-    this.currentVelocityY = this.normalVelocityY;
-    this.targetVelocityY = this.normalVelocityY;
-    this.lastAppliedVelocity = this.normalVelocityY;
+    console.log("✅ RainVelocityController: Простой тест запущен");
 
-    console.log("✅ RainVelocityController: Запущен");
-    window.addEventListener('message', this.onMessage.bind(this));
+    // Ждём один кадр и сразу применяем скорость
+    this.app.on('update', this.applyTestVelocity, this, { once: true });
 };
 
-RainVelocityController.prototype.onMessage = function (event) {
-    if (event.data.type !== 'scrollProgress') return;
-    const progress = event.data.progress || 0;
-
-    if (progress <= 0.08 || progress >= 0.92) {
-        this.targetVelocityY = this.normalVelocityY;
-    } else {
-        this.targetVelocityY = this.slowVelocityY;
-    }
-};
-
-RainVelocityController.prototype.update = function (dt) {
-    this.currentVelocityY = pc.math.lerp(this.currentVelocityY, this.targetVelocityY, this.smoothness);
-
-    if (Math.abs(this.currentVelocityY - this.lastAppliedVelocity) > 0.3) {
-        this.applyVelocity(this.currentVelocityY);
-        this.lastAppliedVelocity = this.currentVelocityY;
-    }
-};
-
-RainVelocityController.prototype.applyVelocity = function (velocityY) {
+RainVelocityController.prototype.applyTestVelocity = function () {
     const ps = this.entity.particlesystem;
-    if (!ps) return;
+    if (!ps) {
+        console.warn("ParticleSystem не найден");
+        return;
+    }
 
     const newGraph = new pc.CurveSet([
         [0, 0],
-        [0, velocityY],
+        [0, this.testVelocityY],   // Меняем Y скорость
         [0, 0]
     ]);
 
-    // ←←← Самое важное изменение
     ps.localVelocityGraph = newGraph;
-    ps.localVelocityGraph2 = newGraph;   // Добавляем это!
+    ps.localVelocityGraph2 = newGraph;   // важно
 
-    console.log(`🔄 Velocity Y применена = ${velocityY.toFixed(2)} | Зона: ${velocityY < -4 ? 'Нормальная' : 'Замедленная'}`);
+    console.log(`🚀 Тест: Velocity Y сразу установлена на ${this.testVelocityY}`);
 };
