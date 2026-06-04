@@ -1235,10 +1235,7 @@ RainVelocityController.prototype.update = function (dt) {
 
 RainVelocityController.prototype.applyVelocity = function (velocityY) {
     const ps = this.entity.particlesystem;
-    if (!ps) {
-        console.warn("⚠️ RainVelocityController: ParticleSystem не найден");
-        return;
-    }
+    if (!ps) return;
 
     const newGraph = new pc.CurveSet([
         [0, 0],
@@ -1248,6 +1245,10 @@ RainVelocityController.prototype.applyVelocity = function (velocityY) {
 
     ps.localVelocityGraph = newGraph;
 
-    // Отладка
-    console.log(`🔄 Velocity обновлена → Y = ${velocityY.toFixed(2)} | Progress зона: ${this.targetVelocityY === this.normalVelocityY ? 'Нормальная' : 'Замедленная'}`);
+    // === ЖЁСТКИЙ ТЕСТ ===
+    console.log(`🔄 Velocity применена → Y = ${velocityY.toFixed(2)}`);
+
+    // Принудительно перезапускаем систему
+    ps.reset();
+    ps.play();
 };
