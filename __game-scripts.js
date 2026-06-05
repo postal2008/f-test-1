@@ -406,8 +406,8 @@ EmissiveFade.prototype.update = function () {
 
     var intensity = 0;
 
-    if (progress <= 0.2) intensity = 2;
-    else if (progress <= 0.3) intensity = pc.math.lerp(2, 0, (progress - 0.2) / 0.1);
+    if (progress <= 0.1) intensity = 2;
+    else if (progress <= 0.2) intensity = pc.math.lerp(2, 0, (progress - 0.1) / 0.1);
     else if (progress <= 0.7) intensity = 0;
     else if (progress <= 0.8) intensity = pc.math.lerp(0, 2, (progress - 0.7) / 0.1);
     else intensity = 2;
