@@ -356,3 +356,50 @@ CameraFrame.prototype.update = function(dt) {
 };
 
 // EmissiveFade.js
+
+var EmissiveFade = pc.createScript('emissiveFade');
+
+EmissiveFade.attributes.add('targetEntity', {
+    type: 'entity',
+    title: 'Объект с материалом (plane)'
+});
+
+EmissiveFade.attributes.add('animEntity', {
+    type: 'entity',
+    title: 'Объект с анимацией'
+});
+
+EmissiveFade.prototype.initialize = function () {
+    if (this.targetEntity && this.targetEntity.render && this.targetEntity.render.meshInstances[0]) {
+        this.material = this.targetEntity.render.meshInstances[0].material;
+    }
+};
+
+EmissiveFade.prototype.update = function () {
+    if (!this.material || !this.animEntity || !this.animEntity.anim || !this.animEntity.anim.baseLayer) return;
+
+    var layer = this.animEntity.anim.baseLayer;
+    var progress = layer.activeStateCurrentTime / layer.activeStateDuration;
+    if (progress < 0) progress = 0;
+    if (progress > 1) progress = 1;
+
+    var intensity = 0;
+
+    if (progress <= 0.2) {
+        intensity = 2;
+    } else if (progress <= 0.3) {
+        intensity = pc.math.lerp(2, 0, (progress - 0.2) / 0.1);
+    } else if (progress <= 0.7) {
+        intensity = 0;
+    } else if (progress <= 0.8) {
+        intensity = pc.math.lerp(0, 2, (progress - 0.7) / 0.1);
+    } else {
+        intensity = 2;
+    }
+
+    this.material.emissiveIntensity = intensity;
+    
+    if (this.material.update) {
+        this.material.update();
+    }
+};
