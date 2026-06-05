@@ -394,8 +394,3 @@ EmissiveFade.prototype.update = function () {
     this.material.emissiveIntensity = intensity;
     this.material.update?.();
 };
-
-    this.material.emissiveIntensity = intensity;
-    this.material.update?.();
-};
-
