@@ -360,25 +360,24 @@ var EmissiveFade = pc.createScript('emissiveFade');
 
 EmissiveFade.attributes.add('targetEntity', {
     type: 'entity',
-    title: 'Plane / Объект'
+    title: 'Объект с материалом (plane)'
+});
+
+EmissiveFade.attributes.add('animEntity', {
+    type: 'entity',
+    title: 'Объект с анимацией (где Zoom)'
 });
 
 EmissiveFade.prototype.initialize = function () {
-    if (!this.targetEntity || !this.targetEntity.render) {
-        console.error('[EmissiveFade] targetEntity не назначен или нет render');
-        return;
-    }
-    
-    const mi = this.targetEntity.render.meshInstances[0];
-    if (mi) {
-        this.material = mi.material;
+    if (this.targetEntity?.render?.meshInstances[0]) {
+        this.material = this.targetEntity.render.meshInstances[0].material;
     }
 };
 
 EmissiveFade.prototype.update = function () {
-    if (!this.material || !this.entity.anim?.baseLayer) return;
+    if (!this.material || !this.animEntity?.anim?.baseLayer) return;
 
-    const layer = this.entity.anim.baseLayer;
+    const layer = this.animEntity.anim.baseLayer;
     const progress = pc.math.clamp(
         (layer.activeStateCurrentTime || 0) / (layer.activeStateDuration || 1), 
         0, 1
@@ -391,6 +390,10 @@ EmissiveFade.prototype.update = function () {
     else if (progress <= 0.7) intensity = 0;
     else if (progress <= 0.8) intensity = pc.math.lerp(0, 2, (progress - 0.7) / 0.1);
     else intensity = 2;
+
+    this.material.emissiveIntensity = intensity;
+    this.material.update?.();
+};
 
     this.material.emissiveIntensity = intensity;
     this.material.update?.();
