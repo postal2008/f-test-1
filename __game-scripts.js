@@ -366,40 +366,54 @@ EmissiveFade.attributes.add('targetEntity', {
 
 EmissiveFade.attributes.add('animEntity', {
     type: 'entity',
-    title: 'Объект с анимацией'
+    title: 'Объект с анимацией (где Zoom)'
 });
 
 EmissiveFade.prototype.initialize = function () {
-    if (this.targetEntity && this.targetEntity.render && this.targetEntity.render.meshInstances[0]) {
-        this.material = this.targetEntity.render.meshInstances[0].material;
+    console.log('[EmissiveFade] Скрипт инициализирован');
+
+    if (this.targetEntity) {
+        console.log('[EmissiveFade] targetEntity найден:', this.targetEntity.name);
+        if (this.targetEntity.render && this.targetEntity.render.meshInstances[0]) {
+            this.material = this.targetEntity.render.meshInstances[0].material;
+            console.log('[EmissiveFade] Материал успешно получен');
+        } else {
+            console.warn('[EmissiveFade] У targetEntity нет render или meshInstances');
+        }
+    } else {
+        console.warn('[EmissiveFade] targetEntity НЕ назначен!');
+    }
+
+    if (this.animEntity) {
+        console.log('[EmissiveFade] animEntity найден:', this.animEntity.name);
+        if (this.animEntity.anim && this.animEntity.anim.baseLayer) {
+            console.log('[EmissiveFade] Анимация (baseLayer) найдена ✓');
+        } else {
+            console.warn('[EmissiveFade] У animEntity нет компонента anim или baseLayer');
+        }
+    } else {
+        console.warn('[EmissiveFade] animEntity НЕ назначен!');
     }
 };
 
 EmissiveFade.prototype.update = function () {
-    if (!this.material || !this.animEntity || !this.animEntity.anim || !this.animEntity.anim.baseLayer) return;
+    if (!this.material || !this.animEntity || !this.animEntity.anim || !this.animEntity.anim.baseLayer) {
+        return;
+    }
 
     var layer = this.animEntity.anim.baseLayer;
     var progress = layer.activeStateCurrentTime / layer.activeStateDuration;
-    if (progress < 0) progress = 0;
-    if (progress > 1) progress = 1;
+    progress = Math.max(0, Math.min(1, progress));
 
     var intensity = 0;
 
-    if (progress <= 0.2) {
-        intensity = 2;
-    } else if (progress <= 0.3) {
-        intensity = pc.math.lerp(2, 0, (progress - 0.2) / 0.1);
-    } else if (progress <= 0.7) {
-        intensity = 0;
-    } else if (progress <= 0.8) {
-        intensity = pc.math.lerp(0, 2, (progress - 0.7) / 0.1);
-    } else {
-        intensity = 2;
-    }
+    if (progress <= 0.2) intensity = 2;
+    else if (progress <= 0.3) intensity = pc.math.lerp(2, 0, (progress - 0.2) / 0.1);
+    else if (progress <= 0.7) intensity = 0;
+    else if (progress <= 0.8) intensity = pc.math.lerp(0, 2, (progress - 0.7) / 0.1);
+    else intensity = 2;
 
     this.material.emissiveIntensity = intensity;
     
-    if (this.material.update) {
-        this.material.update();
-    }
+    if (this.material.update) this.material.update();
 };
