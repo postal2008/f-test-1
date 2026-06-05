@@ -365,7 +365,7 @@ EmissiveFade.attributes.add('targetEntity', {
 });
 
 EmissiveFade.attributes.add('animEntity', {
-    type: 'entity',
+    type: 'Camera',
     title: 'Объект с анимацией (где Zoom)'
 });
 
