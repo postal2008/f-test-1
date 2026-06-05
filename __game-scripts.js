@@ -356,7 +356,6 @@ CameraFrame.prototype.update = function(dt) {
 };
 
 // EmissiveFade.js
-
 var EmissiveFade = pc.createScript('emissiveFade');
 
 EmissiveFade.attributes.add('targetEntity', {
@@ -365,7 +364,7 @@ EmissiveFade.attributes.add('targetEntity', {
 });
 
 EmissiveFade.attributes.add('animEntity', {
-    type: 'Camera',
+    type: 'entity',
     title: 'Объект с анимацией (где Zoom)'
 });
 
@@ -417,3 +416,4 @@ EmissiveFade.prototype.update = function () {
     
     if (this.material.update) this.material.update();
 };
+
