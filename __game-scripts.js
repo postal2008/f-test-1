@@ -355,47 +355,47 @@ CameraFrame.prototype.update = function(dt) {
     }
 };
 
-// EmissiveFade.js
-var EmissiveFade = pc.createScript('emissiveFade');
+// EmissiveFade2.js
+var EmissiveFade2 = pc.createScript('emissiveFade2');
 
-EmissiveFade.attributes.add('targetEntity', {
+EmissiveFade2.attributes.add('targetEntity', {
     type: 'entity',
     title: 'Объект с материалом (plane)'
 });
 
-EmissiveFade.attributes.add('animEntity', {
+EmissiveFade2.attributes.add('animEntity', {
     type: 'entity',
     title: 'Объект с анимацией (где Zoom)'
 });
 
-EmissiveFade.prototype.initialize = function () {
-    console.log('[EmissiveFade] Скрипт инициализирован');
+EmissiveFade2.prototype.initialize = function () {
+    console.log('[EmissiveFade2] Скрипт инициализирован');
 
     if (this.targetEntity) {
-        console.log('[EmissiveFade] targetEntity найден:', this.targetEntity.name);
+        console.log('[EmissiveFade2] targetEntity найден:', this.targetEntity.name);
         if (this.targetEntity.render && this.targetEntity.render.meshInstances[0]) {
             this.material = this.targetEntity.render.meshInstances[0].material;
-            console.log('[EmissiveFade] Материал успешно получен');
+            console.log('[EmissiveFade2] Материал успешно получен');
         } else {
-            console.warn('[EmissiveFade] У targetEntity нет render или meshInstances');
+            console.warn('[EmissiveFade2] У targetEntity нет render или meshInstances');
         }
     } else {
-        console.warn('[EmissiveFade] targetEntity НЕ назначен!');
+        console.warn('[EmissiveFade2] targetEntity НЕ назначен!');
     }
 
     if (this.animEntity) {
-        console.log('[EmissiveFade] animEntity найден:', this.animEntity.name);
+        console.log('[EmissiveFade2] animEntity найден:', this.animEntity.name);
         if (this.animEntity.anim && this.animEntity.anim.baseLayer) {
-            console.log('[EmissiveFade] Анимация (baseLayer) найдена ✓');
+            console.log('[EmissiveFade2] Анимация (baseLayer) найдена ✓');
         } else {
-            console.warn('[EmissiveFade] У animEntity нет компонента anim или baseLayer');
+            console.warn('[EmissiveFade2] У animEntity нет компонента anim или baseLayer');
         }
     } else {
-        console.warn('[EmissiveFade] animEntity НЕ назначен!');
+        console.warn('[EmissiveFade2] animEntity НЕ назначен!');
     }
 };
 
-EmissiveFade.prototype.update = function () {
+EmissiveFade2.prototype.update = function () {
     if (!this.material || !this.animEntity || !this.animEntity.anim || !this.animEntity.anim.baseLayer) {
         return;
     }
@@ -406,11 +406,113 @@ EmissiveFade.prototype.update = function () {
 
     var intensity = 0;
 
-    if (progress <= 0.05) intensity = 2;
-    else if (progress <= 0.2) intensity = pc.math.lerp(2, 0, (progress - 0.05) / 0.1);
-    else if (progress <= 0.7) intensity = 0;
-    else if (progress <= 0.8) intensity = pc.math.lerp(0, 2, (progress - 0.7) / 0.1);
-    else intensity = 2;
+    if (progress <= 0.15) {
+    intensity = 0;
+    }
+    else if (progress <= 0.2) {                    // Fade In
+    var t = (progress - 0.15) / (0.2 - 0.15);
+    intensity = pc.math.lerp(0, 2, t);
+    }
+    
+    else if (progress <= 0.27) {                    // Fade Out
+    var t = (progress - 0.2) / (0.27 - 0.2);
+    intensity = pc.math.lerp(2, 0, t);
+    }
+
+    else if (progress <= 0.9) {                   
+    intensity = 0;
+    }
+    
+    else if (progress <= 0.95) {                    // Fade In
+    var t = (progress - 0.9) / (0.95 - 0.9);
+    intensity = pc.math.lerp(0, 2, t);
+    }
+
+    else {
+    intensity = 2;
+    }
+
+    this.material.emissiveIntensity = intensity;
+    
+    if (this.material.update) this.material.update();
+};
+
+// EmissiveFade1.js
+var EmissiveFade1 = pc.createScript('emissiveFade1');
+
+EmissiveFade1.attributes.add('targetEntity', {
+    type: 'entity',
+    title: 'Объект с материалом (plane)'
+});
+
+EmissiveFade1.attributes.add('animEntity', {
+    type: 'entity',
+    title: 'Объект с анимацией (где Zoom)'
+});
+
+EmissiveFade1.prototype.initialize = function () {
+    console.log('[EmissiveFade1] Скрипт инициализирован');
+
+    if (this.targetEntity) {
+        console.log('[EmissiveFade1] targetEntity найден:', this.targetEntity.name);
+        if (this.targetEntity.render && this.targetEntity.render.meshInstances[0]) {
+            this.material = this.targetEntity.render.meshInstances[0].material;
+            console.log('[EmissiveFade1] Материал успешно получен');
+        } else {
+            console.warn('[EmissiveFade1] У targetEntity нет render или meshInstances');
+        }
+    } else {
+        console.warn('[EmissiveFade1] targetEntity НЕ назначен!');
+    }
+
+    if (this.animEntity) {
+        console.log('[EmissiveFade1] animEntity найден:', this.animEntity.name);
+        if (this.animEntity.anim && this.animEntity.anim.baseLayer) {
+            console.log('[EmissiveFade1] Анимация (baseLayer) найдена ✓');
+        } else {
+            console.warn('[EmissiveFade1] У animEntity нет компонента anim или baseLayer');
+        }
+    } else {
+        console.warn('[EmissiveFade1] animEntity НЕ назначен!');
+    }
+};
+
+EmissiveFade1.prototype.update = function () {
+    if (!this.material || !this.animEntity || !this.animEntity.anim || !this.animEntity.anim.baseLayer) {
+        return;
+    }
+
+    var layer = this.animEntity.anim.baseLayer;
+    var progress = layer.activeStateCurrentTime / layer.activeStateDuration;
+    progress = Math.max(0, Math.min(1, progress));
+
+    var intensity = 0;
+
+    if (progress <= 0.05) {
+    intensity = 2;
+    }
+    else if (progress <= 0.2) {                    // Fade out
+    var t = (progress - 0.05) / (0.2 - 0.05);
+    intensity = pc.math.lerp(2, 0, t);
+    }
+
+    else if (progress <= 0.8) {                   
+    intensity = 0;
+    }
+
+    else if (progress <= 0.85) {                    // Fade in
+    var t = (progress - 0.8) / (0.85 - 0.8);
+    intensity = pc.math.lerp(0, 2, t);
+    }
+
+    else if (progress <= 0.95) {                    // Fade out
+    var t = (progress - 0.85) / (0.95 - 0.85);
+    intensity = pc.math.lerp(2, 0, t);
+    }
+
+    else {
+    intensity = 0;
+    }
 
     this.material.emissiveIntensity = intensity;
     
